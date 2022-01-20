@@ -1,0 +1,17 @@
+{
+  "name": "fingerprintjs-test",
+  "version": "1.0.0",
+  "author": "ba1uev",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "rm -rf dist && tsc",
+    "go": "yarn run build && node dist/index.js"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.10"
+  },
+  "dependencies": {
+    "typescript": "^4.5.4"
+  }
+}
