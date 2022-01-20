@@ -1,22 +1,22 @@
 import apiLatencies from './api-latencies.json'
 
-export async function processTransactions(transactions: Transaction[]): Promise<TransactionProcessed[]> {
-  const results = []
-  for (const transaction of transactions) {
-    const result: Partial<TransactionProcessed> = { id: transaction.id }
-    result.fraudulent = await processTransaction(transaction)
-    results.push(result)
-  }
-  return results
-}
+// export async function processTransactions(transactions: Transaction[]): Promise<TransactionProcessed[]> {
+//   const results = []
+//   for (const transaction of transactions) {
+//     const result: Partial<TransactionProcessed> = { id: transaction.id }
+//     result.fraudulent = await processTransaction(transaction)
+//     results.push(result)
+//   }
+//   return results
+// }
 
-export async function processTransaction(transaction: Transaction): Promise<boolean> {
-  const apiLatency = apiLatencies[transaction.bankCountryCode]
-  const result = Boolean(Math.round(Math.random()))
-  return new Promise((resolve) =>
-    setTimeout(() => resolve(result), apiLatency)
-  )
-}
+// export async function processTransaction(transaction: Transaction): Promise<boolean> {
+//   const apiLatency = apiLatencies[transaction.bankCountryCode]
+//   const result = Boolean(Math.round(Math.random()))
+//   return new Promise((resolve) =>
+//     setTimeout(() => resolve(result), apiLatency)
+//   )
+// }
 
 export const sanitizeTransactionData = (x: TransactionEnhanced): Transaction => ({
   id: x.id,

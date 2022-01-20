@@ -1,8 +1,6 @@
 import { retrieveTransactions } from './transactions'
 import { prioritize, calculateTotalAmount } from './lib'
 
-
-
 async function main(): Promise<void> {
   let transactions = await retrieveTransactions()
   console.log(`Total ${transactions.length} transactions`)
