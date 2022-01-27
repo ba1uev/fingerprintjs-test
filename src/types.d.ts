@@ -13,3 +13,5 @@ interface TransactionProcessed {
   id: string
   fraudulent: boolean
 }
+
+type ApiLatencies = { [key: string]: number }

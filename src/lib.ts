@@ -1,5 +1,3 @@
-import apiLatencies from './api-latencies.json'
-
 // export async function processTransactions(transactions: Transaction[]): Promise<TransactionProcessed[]> {
 //   const results = []
 //   for (const transaction of transactions) {
@@ -24,7 +22,7 @@ export const sanitizeTransactionData = (x: TransactionEnhanced): Transaction => 
   bankCountryCode: x.bankCountryCode
 })
 
-export function prioritize(transactions: Transaction[], totalTime: number = 1000): Transaction[] {
+export function prioritize(transactions: Transaction[], apiLatencies: ApiLatencies, totalTime: number = 1000): Transaction[] {
   const enhancedTransactions: TransactionEnhanced[] = transactions
     .map((tx) => {
       const apiLatency = apiLatencies[tx.bankCountryCode]
