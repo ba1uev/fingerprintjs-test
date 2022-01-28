@@ -15,3 +15,5 @@ interface TransactionProcessed {
 }
 
 type ApiLatencies = { [key: string]: number }
+
+type Algorythm = 'greedy' | 'dp'

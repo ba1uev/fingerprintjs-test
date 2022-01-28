@@ -1,28 +1,37 @@
-// export async function processTransactions(transactions: Transaction[]): Promise<TransactionProcessed[]> {
-//   const results = []
-//   for (const transaction of transactions) {
-//     const result: Partial<TransactionProcessed> = { id: transaction.id }
-//     result.fraudulent = await processTransaction(transaction)
-//     results.push(result)
-//   }
-//   return results
-// }
-
-// export async function processTransaction(transaction: Transaction): Promise<boolean> {
-//   const apiLatency = apiLatencies[transaction.bankCountryCode]
-//   const result = Boolean(Math.round(Math.random()))
-//   return new Promise((resolve) =>
-//     setTimeout(() => resolve(result), apiLatency)
-//   )
-// }
-
 export const sanitizeTransactionData = (x: TransactionEnhanced): Transaction => ({
   id: x.id,
   amount: x.amount,
   bankCountryCode: x.bankCountryCode
 })
 
-export function prioritize(transactions: Transaction[], apiLatencies: ApiLatencies, totalTime: number = 1000): Transaction[] {
+export function prioritize(algorithm: Algorythm, transactions: Transaction[], apiLatencies: ApiLatencies, totalTime: number = 1000): Transaction[] {
+  switch (algorithm) {
+    case 'greedy':
+      return greedyAlgorithm(transactions, apiLatencies, totalTime)
+    case 'dp':
+      return dynamicProgramming(transactions, apiLatencies, totalTime)
+    default:
+      throw new Error(`The algorythm "${algorithm}" is not implemented`)
+  }
+}
+
+export function calculateTotalAmount(transactions: Transaction[]): number {
+  const totalAmountBaseUnit = transactions
+    .map((x) => x.amount * 100)
+    .reduce((acc, x) => acc + x, 0)
+  return totalAmountBaseUnit / 100
+}
+
+export const money = {
+  add(a1: number, a2: number): number {
+    return ((a1 * 100) + (a2 * 100)) / 100
+  },
+  subtract(a1: number, a2: number): number {
+    return ((a1 * 100) - (a2 * 100)) / 100
+  },
+}
+
+export function greedyAlgorithm(transactions: Transaction[], apiLatencies: ApiLatencies, totalTime: number): Transaction[] {
   const enhancedTransactions: TransactionEnhanced[] = transactions
     .map((tx) => {
       const apiLatency = apiLatencies[tx.bankCountryCode]
@@ -75,9 +84,37 @@ export function prioritize(transactions: Transaction[], apiLatencies: ApiLatenci
   return result
 }
 
-export function calculateTotalAmount(transactions: Transaction[]): number {
-  const totalAmountBaseUnit = transactions
-    .map((x) => x.amount * 100)
-    .reduce((acc, x) => acc + x, 0)
-  return totalAmountBaseUnit / 100
+export function dynamicProgramming(transactions: Transaction[], apiLatencies: ApiLatencies, totalTime: number): Transaction[] {
+  const T = Array(transactions.length + 1)
+    .fill(null)
+    .map(() => Array(totalTime + 1).fill(null))
+
+  for (let i = 0; i <= transactions.length; i++) {
+    const tx = i ? transactions[i - 1] : null
+    const txApiLatency = tx ? apiLatencies[tx.bankCountryCode] : null
+    for (let w = 0; w <= totalTime; w++) {
+      if (i === 0 || w === 0) {
+        T[i][w] = 0
+      } else if (txApiLatency > w) {
+        T[i][w] = T[i - 1][w]
+      } else {
+        T[i][w] = Math.max(T[i - 1][w], money.add(tx.amount, T[i - 1][w - txApiLatency]))
+      }
+    }
+  }
+
+  let result = T[transactions.length][totalTime]
+  let apiLatency = totalTime
+  const resultTxs = []
+  for (let i = transactions.length; i > 0 && result > 0; i--) {
+    if (result === T[i - 1][apiLatency]) {
+      continue
+    }
+    const tx = transactions[i - 1]
+    resultTxs.push(tx)
+    result = money.subtract(result, tx.amount)
+    apiLatency -= apiLatencies[tx.bankCountryCode]
+  }
+
+  return resultTxs
 }
